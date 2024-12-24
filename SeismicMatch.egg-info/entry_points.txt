@@ -1,0 +1,5 @@
+[console_scripts]
+create_config = scripts.create_config:main
+create_event_families = scripts.create_event_families:main
+create_templates = scripts.create_templates:main
+match_templates = scripts.match_templates:main

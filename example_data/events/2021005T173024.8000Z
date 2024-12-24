@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<q:quakeml xmlns="http://quakeml.org/xmlns/bed/1.2" xmlns:q="http://quakeml.org/xmlns/quakeml/1.2">
+  <eventParameters publicID="smi:local/822e8cd4-f698-4cc4-9dd8-70101b2e61d9">
+    <event publicID="smi:local/e1104923-c084-4e5a-b917-7a20d53f789f">
+      <origin publicID="smi:local/1d1dfea7-ba0e-449e-bb4e-76298f92ca51">
+        <time>
+          <value>2021-01-05T17:30:24.800000Z</value>
+        </time>
+        <latitude>
+          <value>-23.017</value>
+        </latitude>
+        <longitude>
+          <value>-69.82111</value>
+        </longitude>
+        <depth>
+          <value>11150.0</value>
+        </depth>
+      </origin>
+      <magnitude publicID="smi:local/7604ee59-41c0-43c5-93bf-2433fe677593">
+        <mag>
+          <value>1.979</value>
+        </mag>
+        <type>ML</type>
+      </magnitude>
+    </event>
+  </eventParameters>
+</q:quakeml>
