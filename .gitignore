@@ -1,0 +1,10 @@
+__pycache__/
+.DS_Store/
+TODO.txt
+xypyproject.toml
+.ipynb_checkpoints
+.spyproject
+example_data/events/
+example_data/templates/
+example_data/matches/
+example_data/event_families/
