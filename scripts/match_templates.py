@@ -30,6 +30,9 @@ def main():
     logging.info("Scanning template- and match-files.")
     if not args.template_files:
         args.template_files = os.listdir(config.template_dir)
+    else:
+        args.template_files = [path.split('/')[-1] for path in
+                               args.template_files]
 
     # remove templates that already have match-files from input
     matches = os.listdir(config.matches_dir)

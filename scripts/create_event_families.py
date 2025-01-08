@@ -26,6 +26,9 @@ def main():
     logging.info("Scanning detection files.")
     if not args.detection_files:
         args.detection_files = os.listdir(config.matches_dir)
+    else:
+        args.detection_files = [path.split('/')[-1] for path in
+                                args.detection_files]
 
     logging.info("Merging detections into event families.")
     detections = list(sort_detection_files(args.detection_files))
