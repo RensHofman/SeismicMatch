@@ -2,7 +2,7 @@
 **/__pycache__/
 **/.DS_Store
 TODO.txt
-xypyproject.toml
+xpyproject.toml
 .ipynb_checkpoints
 .spyproject
 example_data/events/
