@@ -1,1 +1,0 @@
-[build-system]requires = ["setuptools>=42", "wheel"]build-backend = "setuptools.build_meta"[project]name = "SeismicMatch"version = "0.1.0"description = "Cross-correlation based template matching for seismology"authors = [    { name = "Rens Hofman", email = "renshofman@gmail.com" }    ]readme = "README.MD"
