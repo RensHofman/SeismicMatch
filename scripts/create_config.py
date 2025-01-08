@@ -13,8 +13,8 @@ Usage:
 import argparse
 import multiprocessing as mp
 
-from config import create_example_config
-from common import setup_logging
+from seismic_match.config import create_example_config
+from seismic_match.common import setup_logging
 
 def main():
 
