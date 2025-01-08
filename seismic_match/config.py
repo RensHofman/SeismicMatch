@@ -315,8 +315,8 @@ class DefaultConfig():
 #       mad_threshold (float, required): threshold of the normalized cross-
 #           correlation value as a factor of the daily median absolute
 #            deviation (MAD).
-#       combine_thresholds (bool, required): if True, the highest of both
-#           thresholds will be used. If False, the lowest of both will be used.
+#       combine_thresholds (bool, required): if True, both thresholds need to
+#           be passed. If False, only one threshold needs to be passed.
 #
 #   folders and file structure:
 #   path names are defined either absolute, or relative to the project
