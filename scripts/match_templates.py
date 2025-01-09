@@ -11,7 +11,7 @@ import logging
 from seismic_match.data_handling import DataHandler
 from seismic_match.template_matching import TemplateMatcher
 from seismic_match.config import Config
-from seismic_match import common
+from seismic_match.common import setup_logging, chunks
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     chosen automatically based on previously processed data.
     """
     args = parse_args()
-    common.setup_logging(args.verbosity)
+    setup_logging(args.verbosity)
     config = Config()
 
     if not os.path.exists(config.matches_dir):
@@ -48,10 +48,10 @@ def main():
     # launch template matcher using multiple GPUs and a CPU pool
     if config.n_gpu > 1:
         chunksize = int(np.ceil(len(template_groups) / config.n_gpu))
-        temp_lists = common.chunks(template_groups, chunksize)
+        temp_lists = chunks(template_groups, chunksize)
         with mp.Manager() as manager:
             with manager.Pool(processes=config.n_cpu) as pool:
-                args = [(temps, config, cuda_device, pool)
+                args = [(temps, config, args.verbosity, cuda_device, pool)
                         for temps, cuda_device in zip(temp_lists,
                                                       config.cuda_devices)]
                 pool.starmap(tm_worker, args)
@@ -68,7 +68,8 @@ def main():
     logging.info("Finished matching templates.")
 
 
-def tm_worker(templates, config, cuda_device, pool):
+def tm_worker(templates, config, verbosity, cuda_device, pool):
+    setup_logging(verbosity)
     dh = DataHandler(config)
     tm = TemplateMatcher(config, dh, pool)
     tm.set_cuda_device(cuda_device)
