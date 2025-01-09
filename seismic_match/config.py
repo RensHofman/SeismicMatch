@@ -10,13 +10,13 @@ from seismic_match import common
 logger = logging.getLogger(__name__)
 
 class Config:
-    
+
     def __init__(self):
         """Read the configuration file.
-    
+
         The file should be named config.yaml and exist in the current
         working directory.
-    
+
         """
         try:
             with open('%s/config.yaml' % os.getcwd(), 'r') as f:
@@ -31,10 +31,10 @@ class Config:
         self.config_file = f.name
         self.validate_config(config)
         self.parse_config(config)
-        
+
         # set flag whether to use cupy or not
         self.use_cupy = self.n_gpu > 0
-    
+
     def parse_config(self, config):
         """Parse the contents of config.yaml."""
         # performance settings:
@@ -42,7 +42,7 @@ class Config:
         self.n_cpu = settings['n_cpu']
         self.n_gpu = settings['n_gpu']
         self.cuda_devices = settings['cuda_devices']
-        
+
         # template settings
         settings = config['templates']
         self.n_stations = settings['n_stations']
@@ -50,13 +50,13 @@ class Config:
         self.prepick = settings['prepick']
         self.min_win_len = settings['min_len']
         self.length_fixed = settings['length_fixed']
-        
+
         # pre-processing settings
         settings = config['pre_processing']
         self.fmin = settings['highpass']
         self.fmax = settings['lowpass']
         self.decimation_factor = settings['decimate']
-        
+
         # cross-correlation settings
         settings = config['cross_correlation']
         self.data_start = settings['data_start']
@@ -74,14 +74,14 @@ class Config:
         self.family_dir = settings['family_dir']
         self.data_path = settings['data_path']
         self.data_structure = settings['data_structure']
-        
+
         # event selection criteria
         settings = config['selection']
         self.cc_criteria = sorted(settings['cc_criteria'])[::-1]
         self.mad_criteria = sorted(settings['mad_criteria'])[::-1]
         self.max_t_diff = settings['max_t_diff']
         self.combine_criteria = settings['combine_criteria']
-        
+
     def validate_config(self, config):
         """Validate the parameters read from the configuration file."""
 
@@ -119,7 +119,7 @@ class Config:
                         errors.append(f"Parameter '{par}' in "
                                       f"section {section} should "
                                       f"be in range {par_range}.")
-                        
+
         # raise errors here before checking paramater consistency
         if errors:
             raise ValueError("The configuration file (config.yaml) "
@@ -155,13 +155,13 @@ class Config:
                                   f"{list(range(n_gpu))}. If you don't wish "
                                   "to specify devices, you can delete this "
                                   "parameter.")
-                
+
         # check consistency of filter settings
         if (config['pre_processing']['highpass'] >=
                 config['pre_processing']['lowpass']):
             errors.append("Parameter 'lowpass' should be greater "
                           "than 'highpass'.")
-            
+
         # check consistency of cross-correlation and selection parameters
         if config['selection']['cc_criteria']:
             if (min(config['selection']['cc_criteria']) <
@@ -179,7 +179,7 @@ class Config:
                 config['cross_correlation']['data_stop']):
             errors.append("The strart date for cross-correlation 'cc_start' "
                           "cannot be after the end date 'cc_end'.")
-                    
+
         if errors:
             raise ValueError("The configuration file (config.yaml) "
                              f"contains {len(errors)} error(s):\n\n" +
