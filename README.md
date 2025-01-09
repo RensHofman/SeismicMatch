@@ -7,26 +7,42 @@ _____/\  /  \_/\_______/     \     / \   /            \   /    \     / \___
        \/                     \   /   \_/              \_/      \   /
                                \_/                               \_/
 ```
-
 - [Installation](#installation)
 - [Workflow](#workflow)
+  1. [Project configuration](#1-projectpconfiguration)
+  2. [Template extraction](#2-templatetextraction)
+  3. [Template matching](#3-template-matching)
+  4. [Event families](#4-event-families)
 - [File formats](#file-formats)
+  -  [Configuration file](#configuration-file)
+  -  [Continuous data](#continuous-data)
+  -  [Station metadata](#station-metadata)
+  -  [Starting catalog](#starting-catalog)
+  -  [Event files](#event-files)
+  -  [Match files](#match-files)
+  -  [Event family files](#event-family-files)
 - [Data example (tutorial)](#example-data-tutorial)
 - [References](#references)
 
-## Installation:
+## Installation
 
 This software is designed to run on an NVIDIA GPU and makes use of the CUDA
 toolkit. If no NVIDIA graphics card is available, or if the user whishes so,
 SeismicMatch can also run in full CPU mode. 
 
-### From source:
+### From source
+
+Download the SeismicMatch zip archive by clicking the green `<> Code` button
+at the top of this page, or clone the repository using git:
+```console
+>>> git clone https://github.com/RensHofman/SeismicMatch.git
+```
 
 Create a conda environment with python3 installed:
 ```console
 >>> conda create -n SM python=3
 ```
-#### Install dependencies:
+#### Install dependencies
 
 ```console
 >>> conda install numpy==1.23.5 scipy pyyaml
@@ -40,7 +56,7 @@ version, but a table is also provided on the [CuPy website](https://docs.cupy.de
 If CuPy can not be installed, SeismicMatch can also run in full CPU mode, albeit
 less efficient.
 
-#### Install SeismicMatch:
+#### Install SeismicMatch
 
 Move inside the SeismicMatch project folder that contains "setup.py" and run the
 installation script (requires pip and setuptools).
@@ -62,8 +78,7 @@ The prerequisites for starting a new project are:
 
 Before you start, make sure that SeismicMatch is installed and the virtual
 environment in which it is installed is activated. Next, choose a location for
-your new project and create a project folder.
-
+your new project and create a project folder:
 ```console
 >>> mkdir my_tm_project
 >>> cd my_tm_project
@@ -73,8 +88,7 @@ your new project and create a project folder.
 To start a new project, we need to create project configuration file. This file
 must be located in the root of our project folder and must be called `config.yaml`.
 We can create a new configuration file with default settings using the command-
-line tool `create_config`
-
+line tool `create_config`:
 ```console
 >>> create_config
 ```
@@ -92,8 +106,7 @@ the continuous data to be preprocessed differently.
 
 ### 2. Template extraction
 The next step is to extract template waveforms for the starting catalog of events
-using the command-line tool `create_templates`.
-
+using the command-line tool `create_templates`:
 ```console
 >>> create_templates my_starting_catalog.xml
 ```
@@ -113,14 +126,12 @@ catalogue. Add the command-line argument `-vvv` to increase the verbosity for de
 Now, we can start the main template matching script using the command-line
 `match_templates`. It is possible to specify specific template waveforms as command-
 line arguments:
-
 ```console
 >>> match_templates *template_waveforms
 ```
 
 If no specific template waveforms are provided as command-line arguments, all template
 waveforms in the template folder are used by default:
-
 ```console
 >>> match_templates
 ```
@@ -134,14 +145,12 @@ template waveform and applies the selection criteria defined in the configuratio
 If a set of simultaneous matches meets these criteria, an event is appended to the
 template family of the template event. It is possible to specify specific match files as
 command-line arguments:
-
 ```console
 >>> creat_event_families *match_files
 ```
 
 If no specific match files are provided as command-line arguments, all match files in the
 matches folder are used by default:
-
 ```console
 create_event_families
 ```
@@ -151,32 +160,135 @@ event families. This creates a list of event detections for each template event 
 folder. The filenames of the event family files match the filenames of the template event
 files in the event folder.
 
-## File formats:
+## File formats
 
-### Continuous data:
+### Configuration file
+The configuration file is called `config.yaml` and is located in the root of the current project
+folder. Settings are read from this file by all command-line tools in the SeismicMatch package.
+A configuration file with default (example) setting can be created automatically as described in
+section [1. Project configuration](#1-project-configuration) of the [Workflow](#workflow) section.
+
+The project parameters that can be adjusted are listed below.
+
+#### performance settings:
+These settings control the performance of SeismicMatch. When the configuration
+file is created, the optimal settings are automatically detected from your system.
+
+- **n_cpu** *(int, optional)*: maximum number of parallel processes to be  
+      used. Defaults to the number of cpu cores.  
+- **n_gpu** *(int, optional)*: maximum number of graphics cards to use. By  
+      default, all graphics cards will be used.  
+- **cuda_devices** *(list, optional)*: specify which CUDA devices should be  
+      used. By default, the first `n_gpu` devices will be used.
+
+#### template settings:
+- **n_stations** *(int, required)*: the number of stations for which to extract  
+    templatewaveforms. These will be the closest available stations  
+    to the event hypocenter.
+- **channel** *(str, optional)*: channel code to be used. The use of multiple  
+    channels is currently not supported. Defaults to 'HHZ'.
+- **prepick** *(float, required)*: starttime of the template windows relative  
+    to the estimated P-wave arrival in seconds.
+- **min_len** *(float, required)*: minimum length of the template waveforms in  
+    sec. The templates will be lengthened with 5 second increments for  
+    increasing hypocentral distance.
+- **length_fixed** *(bool, required)*: if set to True, all template waveforms  
+     will have the same length determined by `min_len`.
+
+#### pre-processing settings:
+- **highpass** *(float, required)*: lower frequency in Hz of the bandpass  
+    filter applied to both the templates (permanent) and continuous  
+    data (upon loading).
+- **lowpass** *(float, required)*: upper frequency in Hz of the bandpass filter  
+    applied to both the templates (permanent) and continuous data (upon  
+    loading).
+- **decimate** *(int, required)*: the factor by which the sampling rate of the  
+    data should be lowered (for faster computation). Decimation will be  
+    applied permanently to the templates and dynamically to the  
+    continuous data upon loading.
+
+#### cross-correlation settings:
+- **data_start** *(yyyy-mm-dd, required)*: starting date for cross-correlation  
+    of the templates with the continous data.
+- **data_stop** *(yyyy-mm-dd, required)*: last date to be included in the  
+    cross-correlation.
+- **cc_threshold** *(float, required)*: threshold of the absolute normalized  
+    cross-correlation value.
+- **mad_threshold** *(float, required)*: threshold of the normalized cross-  
+    correlation value as a factor of the daily median absolute
+    deviation (MAD).
+- **combine_thresholds** *(bool, required)*: if True, both thresholds need to  
+    be passed. If False, only one threshold needs to be passed.
+
+#### folders and file structure:
+path names are defined either absolute, or relative to the project folder  
+containing this configuration file.
+- **meta_dir** *(str, required)*: path to the metadata folder that holds the station  
+    xml file `stations.xml` containing the station information.
+- **event_dir** *(str, required)*: path to the folder where event information is  
+    stored. Single event catalog files will be created here to which the template  
+    files and event families can be traces back to through their filenames.
+- **template_dir** *(str, required)*: path to the folder where template waveforms  
+    will be stored.
+- **matches_dir** *(str, required)*: path to the folder where all matches to each  
+    individual template waveform are stored.
+- **family_dir** *(str, required)*: path to the folder where event detections that   
+    exceed the selection criteria are stored for each template event. Note that the  
+    same event can occur within multiple event families.
+- **data_path** *(str, required)*: path to the folder that holds the continuous data.
+- **data_structure** *(str, required)*: description of the data structure (folders &  
+    filenames) within `data_path`. Placeholders can (and should) be used to include  
+    the data folder, year, netowrk code, station code, location code, channel code  
+    and the julian day in curly brackets: {data_path}, {year}, {net}, {sta}, {loc},  
+    {cha}, {loc}, {julday}.
+
+#### event selection criteria:
+- **cc_criteria** *(list of floats, required)*: selection criteria to define an event  
+    in terms of the absolute normalized cross-correlation value.  
+    For example: [0.7, 0.5] would mean that two simultaneous matches with absolute  
+    cross-correlation values >= 0.7 & >= 0.5 on two different stations are required  
+    within the time range `max_t_diff`. Use an empty list `[]` if no cc-criteria  
+    should be applied.
+- **mad_criteria** *(list of floats, required)*: selection criteria to define an  
+    event in terms of a factor of the daily median absolute deviation (MAD) of the  
+    normalized cross-correlation function. For example: [10, 8] would mean that two  
+    simultaneous matches with 10x and 8x the daily MAD value are required within the  
+    time range `max_t_diff`. Use an empty list `[]` if no MAD-criteria should be  
+    applied.
+- **max_t_diff** *(float, required)*: maximum time difference in seconds between  
+    individual detections that allows them to be called simultaneous for the purpose  
+    of the selection criteria defined above. Note that the time difference relates to  
+    the estimated origin time of the detections and not the actual occurrence of  
+    the template waveforms, since these would depend on the stations hypocentral  
+    distance.
+- **combine_criteria** *(bool, required)*: if True, both the `cc_criteria` as well as  
+    the `mad_criteria` need to be met. If set to False an event is defined when either  
+    of both criteria are met.
+
+### Continuous data
 The continuous data must be in a [format readable by ObsPy](https://docs.obspy.org/packages/autogen/obspy.core.stream.read.html#supported-formats),
 where each file represents data from a single channel on a single day. The data should be
 structured in a way that the filename (including the path) contains the network code, station
 code, location code, channel code and the julian day as a 3-digit number. This data structure
 needs to be defined in the configuration file.
 
-### Station metadata:
+### Station metadata
 The station metadata needs to be provided in StationXML format at the channel level. This format
 is provided by all [FDSN webservices](https://www.fdsn.org/xml/station/).
 
-### Starting catalog:
+### Starting catalog
 The starting catalog should be in a [format readable by ObsPy](https://docs.obspy.org/packages/autogen/obspy.core.event.read_events.html#supported-formats).
 
-### Event files:
+### Event files
 Individual event files are created in the event folder for each template event. The filenames
 are a representation of the event origin time as defined in the starting catalog. This identifier
 is also used in the template waveform files. This way, matches can easily be recombined with
 template information to construct event detections. The event files are written in QuakeML format
 to support all event information contained in the starting catalog.
 
-### Match files:
-The filenames of the match files are a combination of the waveform identifier, the template
-event identifier, and the number of samples in the template waveform: `waveformid_evid_nsamples`.
+### Match files
+The filenames of the match files are a combination of the waveform identifier, the template event
+identifier, and the number of samples in the template waveform: `{waveform-id}_{event-id}_{n-samples}`.
 Each file contains the instances where a single template waveform passes the cross-correlation
 threshold with the corresponding continuous data. The files consist of 4 columns, separated by
 spaces. Each line represents a single detection. The columns represent the detection time (time
@@ -194,9 +306,9 @@ Example match file `example_data/matches/CX.PB01..HHZ_2021005T032907.3800Z_1076`
 2021005T115025.3783Z 0.814 22.190 5.558E-02
 ```
 
-### Event family files:
+### Event family files
 The filenames of the event family files correspond to the template event files in the event folder,
-and are a representation of the template events origin time. The files consit of 5 columns, separated
+and are a representation of the template events origin time. The files consist of 5 columns, separated
 by spaces. Each line represents an event detection. The columns represent the estimated event origin
 time, a comma separated list of channels contributing to the detection, a comma separated list of the
 normalized cross-correlation values for each channel, a comma separated list of the MAD values for
@@ -213,7 +325,7 @@ Example event family file `example_data/event_families/2021005T032907.3800Z`:
 
 ```
 
-## Example data (tutorial):
+## Example data (tutorial)
 
 The SeismicMatch installation folder contains a directory `example_data` that
 can be used to follow allong with this example. First, move to this directory.
