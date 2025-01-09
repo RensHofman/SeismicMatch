@@ -9,8 +9,8 @@ _____/\  /  \_/\_______/     \     / \   /            \   /    \     / \___
 ```
 - [Installation](#installation)
 - [Workflow](#workflow)
-  1. [Project configuration](#1-projectpconfiguration)
-  2. [Template extraction](#2-templatetextraction)
+  1. [Project configuration](#1-project-configuration)
+  2. [Template extraction](#2-template-extraction)
   3. [Template matching](#3-template-matching)
   4. [Event families](#4-event-families)
 - [File formats](#file-formats)
@@ -127,7 +127,7 @@ Now, we can start the main template matching script using the command-line
 `match_templates`. It is possible to specify specific template waveforms as command-
 line arguments:
 ```console
->>> match_templates *template_waveforms
+>>> match_templates *template_waveform_files
 ```
 
 If no specific template waveforms are provided as command-line arguments, all template
