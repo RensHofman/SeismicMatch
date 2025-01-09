@@ -209,17 +209,20 @@ def create_example_config():
         f.write(default.parameter_descriptions)
     logger.info("New config file config.yaml was created")
     # This validates the config immediately
-    config = Config()
+    Config()
+
 
 class DefaultConfig():
-    
+    """Container for the default configuration settings and info."""
+
     def __init__(self):
-        # param_name: (required, type, range, default)
+        # param_name: (required, type, valid range, default value)
         self.parameters = {
         'performance': {
             'n_cpu': (False, int, (1, 500), common.cpu_count()),
             'n_gpu': (False, int, (0, 50), common.gpu_count()),
-            'cuda_devices': (False, list, None, list(range(common.gpu_count())))
+            'cuda_devices': (False, list, None,
+                             list(range(common.gpu_count())))
             },
         'templates': {
             'n_stations': (True, int, (1, 100), 4),
@@ -258,7 +261,7 @@ class DefaultConfig():
             'combine_criteria': (True, bool, None, True),
             }
         }
-        
+
         self.config_header = """\
 #   config.yaml
 #
@@ -267,16 +270,16 @@ class DefaultConfig():
 #   Please read the parameter descriptions at the bottom of this file.
 
 """
-        
+
         self.parameter_descriptions = """
 #   parameter descriptions:
 #
 #   performance settings:
 #       n_cpu (int, optional): maximum number of parallel processes to be
 #           used. Defaults to the number of cpu cores.
-#       n_gpu: (int, optional): maximum number of graphics cards to use. By
+#       n_gpu (int, optional): maximum number of graphics cards to use. By
 #           default, all graphics cards will be used.
-#       cuda_devices: (list, optional): specify which CUDA devices should be
+#       cuda_devices (list, optional): specify which CUDA devices should be
 #           used. By default, the first 'n_gpu' devices will be used.
 #
 #   template settings:
@@ -321,45 +324,46 @@ class DefaultConfig():
 #   folders and file structure:
 #   path names are defined either absolute, or relative to the project
 #   folder containing this configuration file.
-#       meta_dir (str): path to the metadata folder that holds the station
-#           xml file `stations.xml` containing the station information.
-#       event_dir (str): path to the folder where event information is
-#           stored. Single event catalog files will be created here to
+#       meta_dir (str, required): path to the metadata folder that holds the
+#           station xml file `stations.xml` containing the station information.
+#       event_dir (str, required): path to the folder where event information
+#           is stored. Single event catalog files will be created here to
 #           which the template files and event families can be traces back
 #           to through their filenames.
-#       template_dir (str): path to the folder where template waveforms
-#           will be stored.
-#       matches_dir (str): path to the folder where all matches to each
-#           individual template waveform are stored.
-#       family_dir (str): path to the folder where event detections that
-#           exceed the selection criteria are stored for each template
+#       template_dir (str, required): path to the folder where template
+#           waveforms will be stored.
+#       matches_dir (str, required): path to the folder where all matches to
+#           each individual template waveform are stored.
+#       family_dir (str, required): path to the folder where event detections
+#           that exceed the selection criteria are stored for each template
 #           event. Note that the same event can occur within multiple event
 #           families.
-#       data_path (str): path to the folder that holds the continuous data.
-#       data_structure (str)): description of the data structure (folders &
-#           filenames) within `data_path`. Placeholders can (and should) be
-#           used to include the data folder, year, netowrk code, station
-#           code, location code, channel code and the julian day in curly
-#           brackets: {data_path}, {year}, {net}, {sta}, {loc}, {cha},
+#       data_path (str, required): path to the folder that holds the
+#           continuous data.
+#       data_structure (str, required): description of the data structure
+#           (folders & filenames) within `data_path`. Placeholders can (and
+#           should) be used to include the data folder, year, netowrk code,
+#           station code, location code, channel code and the julian day in
+#           curly brackets: {data_path}, {year}, {net}, {sta}, {loc}, {cha},
 #           {loc}, {julday}.
 #
 #   event selection criteria:
-#       cc_criteria (list of floats): selection criteria to define an event
-#           in terms of the absolute normalized cross-correlation value.
+#       cc_criteria (list of floats, required): selection criteria to define an
+#           event in terms of the absolute normalized cross-correlation value.
 #           For example: [0.7, 0.5] would mean that two simultaneous
 #           matches with absolute cross-correlation values >= 0.7 & >= 0.5
 #           on two different stations are required within the time range
 #           `max_t_diff`. Use an empty list `[]` if no cc-criteria should
 #           be applied.
-#       mad_criteria (list of floats): selection criteria to define an
-#           event in terms of a factor of the daily median absolute
+#       mad_criteria (list of floats, required): selection criteria to define
+#           an event in terms of a factor of the daily median absolute
 #           deviation (MAD) of the normalized cross-correlation function.
 #           For example: [10, 8] would mean that two simultaneous matches
 #           with 10x and 8x the daily MAD value are required within the
 #           time range `max_t_diff`. Use an empty list `[]` if no MAD-
 #           criteria should be applied.
-#       max_t_diff (float): maximum time difference in seconds between
-#           individual detections that allows them to be called
+#       max_t_diff (float, required): maximum time difference in seconds
+#           between individual detections that allows them to be called
 #           simultaneous for the purpose of the selection criteria defined
 #           above. Note that the time difference relates to the estimated
 #           origin time of the detections and not the actual occurrence of
