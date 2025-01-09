@@ -25,15 +25,15 @@ class TemplateMatcher:
     def __init__(self, config, data_handler, pool):
         """Initiate the template matcher."""
         self.config = config
-        
+
         if self.config.use_cupy:
             global cp
             import cupy as _cp
             cp = _cp
-            
+
         self.dh = data_handler
         self.pool = pool
-        
+
     def set_cuda_device(self, cuda_device):
         """Set the CUDA device for GPU computation."""
         cp.cuda.Device(cuda_device).use()
@@ -42,6 +42,26 @@ class TemplateMatcher:
         """Return the sampling rate of the waveform file."""
         stats = get_record_information(fname)
         return stats['samp_rate']
+
+    def estimate_gpu_capacity(self, sample_rate):
+        """If a GPU is used, estimate the maximum number of data traces."""
+        if not self.config.use_cupy:
+            return 30
+        logger.debug("Testing GPU memory capacity.")
+        # number of samples in full data trace
+        n_samples = int(sample_rate * 86400)
+        # resulting cross-correlation length
+        cc_len = next_fast_len(n_samples)
+        N_MAX = 1
+        while True:
+            try:
+                # try to allocate memory for all cross-correlations
+                cc = cp.empty((cc_len, N_MAX, N_MAX), dtype=cp.complex64)
+            except cp.cuda.memory.OutOfMemoryError:
+                break
+            N_MAX += 1
+        logger.debug(f"Succesfully allocated memory for {N_MAX - 1} traces.")
+        return N_MAX - 1
 
     def find_optimal_chunksize(self, chunk, N):
         """Optimal size for matrix cc.
@@ -73,10 +93,10 @@ class TemplateMatcher:
         n_cc = n_data * n_templates
 
         # break calculation in parts that fit on GPU memory
-        #N_MAX = 23
-        N_MAX = 30
+        N_MAX = self.estimate_gpu_capacity(sample_rate)
         if n_templates < N_MAX:
             N_MAX = int(N_MAX**2 / n_templates / 2)
+        # find lowest N_MAX that does not increase the number of iterations
         N_MAX = self.find_optimal_chunksize(N_MAX, n_data)
 
         # data and template pointers
@@ -110,7 +130,7 @@ class TemplateMatcher:
 
                 if data_st is not None:
                     # load templates on GPU if selection changed
-                    if not templates or templates[0] != all_templates[ti]:
+                    if len(templates) == 0 or templates[0] != all_templates[ti]:
                         templates = all_templates[ti:ti+N_MAX]
                         temp_st, t_temp = self.dh.read_bulk_data(
                                                 templates,
@@ -131,8 +151,8 @@ class TemplateMatcher:
                     n_detections += n
                     t_cc = timer() - cc_timer
                     _n_cc = len(data)*len(templates)
-                    logger.debug(f"\tprocessed {_n_cc} cross-correlation"
-                                 f" at {_n_cc/t_cc:.2f} /s")
+                    logger.debug(f"processed {_n_cc} cross-correlations "
+                                 f"at {_n_cc/t_cc:.2f} /s")
                     sys.stdout.flush()
 
                 # if no exception has occurred, cleanup data and increment
@@ -165,7 +185,7 @@ class TemplateMatcher:
                                     N_MAX,
                                     len(all_data) - di
                                     )
-                    logger.debug("\tGPU memory full, reducing",
+                    logger.debug("GPU memory full, reducing "
                                  f"chunk size to {N_MAX}")
                     if N_MAX == 0:
                         logger.error("No free memory on GPU.")
@@ -291,9 +311,9 @@ class TemplateMatcher:
                 continue
             pad = 1
             pad1, pad2 = (pad + 1) // 2, pad // 2
-            padded_tr = self._pad_zeros(data_tr, M, pad1, pad2)
+            padded_tr = self.pad_zeros(data_tr, M, pad1, pad2)
             data_abs = cp.abs(data_tr)
-            data_norm = self._window_sum(padded_tr ** 2, N)
+            data_norm = self.window_sum(padded_tr ** 2, N)
 
             for i, temp_tr in enumerate(templates):
                 cc = cp.fft.ifft(cc_matrix[i, j,])[:M-N+1]
@@ -327,13 +347,13 @@ class TemplateMatcher:
         del cc_matrix
         return n_matches
 
-    def _window_sum(self, data, window_len):
+    def window_sum(self, data, window_len):
         """Return the rolling sum of data."""
         window_sum = cp.convolve(data, cp.ones(window_len,
                                                dtype=cp.int16), 'valid')
         return window_sum[1:]
 
-    def _pad_zeros(self, a, M, num, num2=None):
+    def pad_zeros(self, a, M, num, num2=None):
         """Pad num zeros at both sides of array a."""
         if num2 is None:
             num2 = num
