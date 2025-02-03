@@ -36,7 +36,7 @@ def count_cuda_devices():
     """Return the number of gpu cards."""
     try:
         import cupy as cp
-    except ModuleNotFoundError:
+    except (ModuleNotFoundError, ImportError):
         return 0
     return cp.cuda.runtime.getDeviceCount()
 
