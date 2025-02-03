@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='SeismicMatch',
     version='0.1',
-    packages=[],
-    py_modules=['common', 'data_handler'],
+    packages=find_packages(),
     install_requires=[
         # 'numpy<=1.23.5',
         # 'scipy==1.4.1',
