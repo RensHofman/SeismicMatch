@@ -146,7 +146,7 @@ If a set of simultaneous matches meets these criteria, an event is appended to t
 template family of the template event. It is possible to specify specific match files as
 command-line arguments:
 ```console
->>> creat_event_families *match_files
+>>> create_event_families *match_files
 ```
 
 If no specific match files are provided as command-line arguments, all match files in the
