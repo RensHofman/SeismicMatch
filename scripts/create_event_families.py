@@ -47,6 +47,7 @@ def process_detections(detections, config, verbosity):
         event_detections = merge(config, event_detections)
         events = apply_criteria(config, event_detections)
         ev_id = temp_detections[0, 1]
+        n = 0
         with open(f'{config.family_dir}/{ev_id}', 'w') as f:
             for n, ev in enumerate(events):
                 f.write(f'{" ".join(ev.astype(str))}\n')
