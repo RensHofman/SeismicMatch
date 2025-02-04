@@ -1,6 +1,6 @@
 # SeismicMatch documentation
 ```
-                          _                       __        
+                          _                       __
                          / \               _   __/  \       __
           /\            /   \       _     / \_/      \     /  \       _
 _____/\  /  \_/\_______/     \     / \   /            \   /    \     / \___
@@ -28,7 +28,7 @@ _____/\  /  \_/\_______/     \     / \   /            \   /    \     / \___
 
 This software is designed to run on an NVIDIA GPU and makes use of the CUDA
 toolkit. If no NVIDIA graphics card is available, or if the user whishes so,
-SeismicMatch can also run in full CPU mode. 
+SeismicMatch can also run in full CPU mode.
 
 ### From source
 
@@ -47,14 +47,20 @@ Create a conda environment with python3 installed:
 ```console
 >>> conda install numpy==1.23.5 scipy pyyaml
 >>> conda install -c conda-forge obspy
+```
+If you have an NVIDIA GPU connected to your machine and whish to use the
+GPU mode, install the CuPy package using the command below. Do not install
+CuPy if you do not have an NVIDIA GPU available. The CPU mode will always
+be available, whether CuPy is installed or not.
+```console
 >>> conda install -c conda-forge cupy
 ```
 Note that the installation of cupy requires the CUDA toolkit, and the CuPy
 version depends on the CUDA driver. Conda should automatically pick the right
 version, but a table is also provided on the [CuPy website](https://docs.cupy.dev/en/stable/install.html).
 
-If CuPy can not be installed, SeismicMatch can also run in full CPU mode, albeit
-less efficient.
+See [performance settings](#performance-settings) for information on how to use
+the full CPU mode.
 
 #### Install SeismicMatch
 
@@ -171,8 +177,10 @@ section [1. Project configuration](#1-project-configuration) of the [Workflow](#
 The project parameters that can be adjusted are listed below.
 
 #### performance settings:
-These settings control the performance of SeismicMatch. When the configuration
-file is created, the optimal settings are automatically detected from your system.
+These settings control the performance of SeismicMatch. When the configuration  
+file is created, the optimal settings are automatically detected from your system.  
+If you wish to use full CPU mode, set `n_gpu` to 0. This is the default setting  
+if no graphics card is available.
 
 - **n_cpu** *(int, optional)*: maximum number of parallel processes to be  
       used. Defaults to the number of cpu cores.  
@@ -221,7 +229,7 @@ file is created, the optimal settings are automatically detected from your syste
     be passed. If False, only one threshold needs to be passed.
 
 #### folders and file structure:
-path names are defined either absolute, or relative to the project folder  
+Path names are defined either absolute, or relative to the project folder  
 containing this configuration file.
 - **meta_dir** *(str, required)*: path to the metadata folder that holds the station  
     xml file `stations.xml` containing the station information.

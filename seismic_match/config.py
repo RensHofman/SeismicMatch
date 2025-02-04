@@ -275,6 +275,10 @@ class DefaultConfig():
 #   parameter descriptions:
 #
 #   performance settings:
+#   These settings control the performance of SeismicMatch. When the configuration
+#   file is created, the optimal settings are automatically detected from your
+#   system. If you wish to use full CPU mode, set n_gpu to 0. This is the default
+#   setting if no graphics card is available.
 #       n_cpu (int, optional): maximum number of parallel processes to be
 #           used. Defaults to the number of cpu cores.
 #       n_gpu (int, optional): maximum number of graphics cards to use. By
@@ -322,7 +326,7 @@ class DefaultConfig():
 #           be passed. If False, only one threshold needs to be passed.
 #
 #   folders and file structure:
-#   path names are defined either absolute, or relative to the project
+#   Path names are defined either absolute, or relative to the project
 #   folder containing this configuration file.
 #       meta_dir (str, required): path to the metadata folder that holds the
 #           station xml file `stations.xml` containing the station information.
