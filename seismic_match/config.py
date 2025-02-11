@@ -233,8 +233,6 @@ class DefaultConfig():
             'n_gpu': (False, int, (0, 50), common.gpu_count()),
             'cuda_devices': (False, list, None,
                              list(range(common.gpu_count()))),
-            'template_data_path': (False, str, None, None),
-            'template_data_structure': (False, str, None, None),
             },
         'templates': {
             'n_stations': (True, int, (1, 100), 4),
@@ -242,6 +240,8 @@ class DefaultConfig():
             'prepick': (True, (float, int), (0, 10), 3),
             'min_len': (True, (float, int), (5, 100), 15),
             'length_fixed': (True, bool, None, False),
+            'template_data_path': (False, str, None, None),
+            'template_data_structure': (False, str, None, None),
             },
         'pre_processing': {
             'highpass': (True, (float, int), (0, 100), 1.),
