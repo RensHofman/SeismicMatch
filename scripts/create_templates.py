@@ -66,7 +66,7 @@ def create_templates(event_list, config, verbosity):
     for event in event_list:
         st = dh.create_template_traces(event)
         if not st:
-            return 0, 0
+            continue
         logging.debug(f"{len(st)} candidate stream(s) for event on "
                      f"{event.origins[0].time.ctime()}.")
         for tr in st:
