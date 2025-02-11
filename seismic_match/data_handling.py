@@ -111,10 +111,13 @@ class DataHandler:
             for sta in net:
                 cha = sta.select(channel=self.config.channel)[0]
                 loc = cha.location_code
-                fname = self.construct_data_path(net.code, sta.code,
-                                                 loc, cha.code,
-                                                 origin.time.year,
-                                                 origin.time.julday)
+                fname = self.construct_data_path(
+                            net.code, sta.code,
+                            loc, cha.code,
+                            origin.time.year,
+                            origin.time.julday,
+                            data_path='template_data_path',
+                            data_structure='template_data_structure')
                 if not os.path.isfile(fname):
                     logger.debug(f"Station {sta.code} has no data "
                                  "for this day.")
@@ -147,18 +150,24 @@ class DataHandler:
         around the given time window.
         """
         st = Stream()
-        data = [self.construct_data_path(net, sta, loc, cha,
-                                         window[0].year,
-                                         window[0].julday)]
+        data = [self.construct_data_path(
+                    net, sta, loc, cha,
+                    window[0].year,
+                    window[0].julday,
+                    data_path='template_data_path',
+                    data_structure='template_data_structure')]
         if window[0].julday != window[1].julday:
-            data += [self.construct_data_path(net, sta, loc, cha,
-                                              window[1].year,
-                                              window[1].julday)]
+            data += [self.construct_data_path(
+                        net, sta, loc, cha,
+                        window[1].year,
+                        window[1].julday,
+                        data_path='template_data_path',
+                        data_structure='template_data_structure')]
         for f in data:
             tr = self.read_and_filter_trace(f)
             if tr is not None:
                 st += tr
-                        
+
         st.trim(window[0], window[1])
         st.detrend(type='constant')
         return st
@@ -288,33 +297,38 @@ class DataHandler:
         Returns the start and end time of the template assuming
         a straight ray path and constant P wave velocity.
         """
-    
         depth = event.origins[0].get('depth', 5e3)
         if depth == None:
             depth = 5e3
         depth /= 1e3
         dz = depth + station.elevation / 1e3
         path_length = np.sqrt(dz**2 + distance**2)
-    
+
         p_time = 2 + path_length / 8.
         start = event.origins[0].time + p_time - self.config.prepick
 
         if self.config.length_fixed:
             return [start, start + self.config.min_length]
-        
+
         s_time = 8 + p_time * 1.5
         end = event.origins[0].time + s_time + self.config.min_win_len
         # rescale to ensure discrete 5 second increments in window length
         length = 5 * (end - start) // 5 + 5
         return [start, start + length]
 
-    def construct_data_path(self, net, sta, loc, cha, year, julday):
+    def construct_data_path(self, net, sta, loc, cha, year, julday,
+                            path_attr='data_path',
+                            structure_attr='data_structure'):
         """Return the path to the data file."""
         if isinstance(julday, int):
             # enforce 3 digit integer
             julday = f'{julday:03}'
-        return self.config.data_structure.format(
-                    data_path=self.config.data_path,
+
+        data_path = getattr(self.config, path_attr)
+        data_structure = getattr(self.config, structure_attr)
+
+        return data_structure.format(
+                    data_path=data_path,
                     net=net,
                     sta=sta,
                     loc=loc,
