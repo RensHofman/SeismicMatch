@@ -312,8 +312,8 @@ class DefaultConfig():
 #       length_fixed (bool, required): if set to True, all template waveforms
 #            will have the same length determined by `min_len`.
 #       template_data_path (str, optional): path to the folder that holds the
-#           continuous data from which templates should be extracted if this
-#           path is required to be different from the general data path.
+#           continuous data from which templates should be extracted in case
+#           this path is required to be different from the general data path.
 #           Defaults to the data_path under 'folders and file structure'.
 #       template_data_structure (str, optional): description of the data
 #           structure (folders & filenames) within 'template_data_path'.
