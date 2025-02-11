@@ -74,6 +74,9 @@ class DataHandler:
                 logger.debug(f"Station {sta_id} has insufficient SNR.")
             if n_streams == self.config.n_stations:
                 break
+        if n_streams == 0:
+            logger.warning("No template waveforms could be extracted"
+                           f" for event on {event.origins[0].time.ctime()}")
 
         return templates
 
@@ -116,8 +119,8 @@ class DataHandler:
                             loc, cha.code,
                             origin.time.year,
                             origin.time.julday,
-                            data_path='template_data_path',
-                            data_structure='template_data_structure')
+                            path_attr='template_data_path',
+                            structure_attr='template_data_structure')
                 if not os.path.isfile(fname):
                     logger.debug(f"Station {sta.code} has no data "
                                  "for this day.")
@@ -154,15 +157,15 @@ class DataHandler:
                     net, sta, loc, cha,
                     window[0].year,
                     window[0].julday,
-                    data_path='template_data_path',
-                    data_structure='template_data_structure')]
+                    path_attr='template_data_path',
+                    structure_attr='template_data_structure')]
         if window[0].julday != window[1].julday:
             data += [self.construct_data_path(
                         net, sta, loc, cha,
                         window[1].year,
                         window[1].julday,
-                        data_path='template_data_path',
-                        data_structure='template_data_structure')]
+                        path_attr='template_data_path',
+                        structure_attr='template_data_structure')]
         for f in data:
             tr = self.read_and_filter_trace(f)
             if tr is not None:
