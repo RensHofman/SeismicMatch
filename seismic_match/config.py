@@ -50,6 +50,12 @@ class Config:
         self.prepick = settings['prepick']
         self.min_win_len = settings['min_len']
         self.length_fixed = settings['length_fixed']
+        self.temp_data_path = settings.get(
+                                'template_data_path',
+                                config['directories']['data_path'])
+        self.temp_data_structure = settings.get(
+                                    'template_data_structure',
+                                    config['directories']['data_structure'])
 
         # pre-processing settings
         settings = config['pre_processing']
@@ -96,10 +102,13 @@ class Config:
                     if required:
                         errors.append(f"Required parameter '{par}' in "
                                       f"section {section} is missing.")
-                    else:
+                    elif default is not None:
                         config[section][par] = default
+                    else:
+                        continue
                 value = config[section][par]
                 if not isinstance(value, par_type):
+
                     if isinstance(par_type, tuple):
                         par_type = par_type[0]
                     errors.append(f"Parameter '{par}' in section "
@@ -204,7 +213,8 @@ def create_example_config():
             f.write(f"# {section} settings\n")
             f.write(f"{section}:\n")
             for name, (_, _, _, value) in params.items():
-                f.write(f"    {name}: {value}\n")
+                if value is not None:
+                    f.write(f"    {name}: {value}\n")
             f.write("\n")
         f.write(default.parameter_descriptions)
     logger.info("New config file config.yaml was created")
@@ -222,7 +232,7 @@ class DefaultConfig():
             'n_cpu': (False, int, (1, 500), common.cpu_count()),
             'n_gpu': (False, int, (0, 50), common.gpu_count()),
             'cuda_devices': (False, list, None,
-                             list(range(common.gpu_count())))
+                             list(range(common.gpu_count()))),
             },
         'templates': {
             'n_stations': (True, int, (1, 100), 4),
@@ -230,6 +240,8 @@ class DefaultConfig():
             'prepick': (True, (float, int), (0, 10), 3),
             'min_len': (True, (float, int), (5, 100), 15),
             'length_fixed': (True, bool, None, False),
+            'template_data_path': (False, str, None, None),
+            'template_data_structure': (False, str, None, None),
             },
         'pre_processing': {
             'highpass': (True, (float, int), (0, 100), 1.),
@@ -275,10 +287,10 @@ class DefaultConfig():
 #   parameter descriptions:
 #
 #   performance settings:
-#   These settings control the performance of SeismicMatch. When the configuration
-#   file is created, the optimal settings are automatically detected from your
-#   system. If you wish to use full CPU mode, set n_gpu to 0. This is the default
-#   setting if no graphics card is available.
+#   These settings control the performance of SeismicMatch. When the
+#   configuration file is created, the optimal settings are automatically
+#   detected from your system. If you wish to use full CPU mode, set
+#   'n_gpu' to 0. This is the default setting if no graphics card is available.
 #       n_cpu (int, optional): maximum number of parallel processes to be
 #           used. Defaults to the number of cpu cores.
 #       n_gpu (int, optional): maximum number of graphics cards to use. By
@@ -299,6 +311,17 @@ class DefaultConfig():
 #           increasing hypocentral distance.
 #       length_fixed (bool, required): if set to True, all template waveforms
 #            will have the same length determined by `min_len`.
+#       template_data_path (str, optional): path to the folder that holds the
+#           continuous data from which templates should be extracted in case
+#           this path is required to be different from the general data path.
+#           Defaults to the data_path under 'folders and file structure'.
+#       template_data_structure (str, optional): description of the data
+#           structure (folders & filenames) within 'template_data_path'.
+#           Placeholders can (and should) be used to include the data folder,
+#           year, netowrk code, station code, location code, channel code and
+#           the julian day in curly brackets: {data_path}, {year}, {net},
+#           {sta}, {loc}, {cha}, {loc}, {julday}. Defaults to the
+#           'data_structure' as defined under 'folders and file structure'.
 #
 #   pre-processing settings:
 #       highpass (float, required): lower frequency in Hz of the bandpass

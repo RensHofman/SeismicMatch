@@ -202,6 +202,17 @@ if no graphics card is available.
     increasing hypocentral distance.
 - **length_fixed** *(bool, required)*: if set to True, all template waveforms  
      will have the same length determined by `min_len`.
+- **template_data_path** *(str, optional)*: path to the folder that holds the  
+     continuous data from which templates should be extracted in case this  
+     path is required to be different from the general data path. Defaults to  
+     the `data_path` under 'folders and file structure'.  
+- **template_data_structure** *(str, optional)*: description of the data  
+     structure (folders & filenames) within `template_data_path`.  
+     Placeholders can (and should) be used to include the data folder, year,  
+     netowrk code, station code, location code, channel code and the julian  
+     day in curly brackets: {data_path}, {year}, {net}, {sta}, {loc}, {cha},  
+     {loc}, {julday}. Defaults to the `data_structure` as defined under  
+     'folders and file structure'.
 
 #### pre-processing settings:
 - **highpass** *(float, required)*: lower frequency in Hz of the bandpass  

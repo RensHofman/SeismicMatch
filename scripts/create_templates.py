@@ -66,8 +66,6 @@ def create_templates(event_list, config, verbosity):
     for event in event_list:
         st = dh.create_template_traces(event)
         if not st:
-            logging.warning("No templates could be extracted for event on "
-                           f"{event.origins[0].time.ctime()}.")
             return 0, 0
         logging.debug(f"{len(st)} candidate stream(s) for event on "
                      f"{event.origins[0].time.ctime()}.")
