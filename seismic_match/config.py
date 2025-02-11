@@ -108,7 +108,7 @@ class Config:
                         continue
                 value = config[section][par]
                 if not isinstance(value, par_type):
-                    
+
                     if isinstance(par_type, tuple):
                         par_type = par_type[0]
                     errors.append(f"Parameter '{par}' in section "
