@@ -4,7 +4,7 @@ Create a default configuration file that can be adapted
 to the project needs.
 
 The file will be created in the current working directory
-and be called config.yaml. A description of the parameters 
+and be called config.yaml. A description of the parameters
 can be found at the bottom of the config file.
 
 Usage:
@@ -19,7 +19,7 @@ from seismic_match.common import setup_logging
 def main():
 
     args = parse_args()
-    setup_logging(args.verbosity)
+    logger = setup_logging(args.verbosity, __name__)
     create_example_config()
 
 

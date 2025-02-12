@@ -18,30 +18,30 @@ def main():
 
     config = Config()
     args = parse_args()
-    setup_logging(args.verbosity)
+    logger = setup_logging(args.verbosity, __name__)
 
     if not os.path.exists(config.family_dir):
         os.makedirs(config.family_dir)
 
-    logging.info("Scanning detection files.")
+    logger.info("Scanning detection files.")
     if not args.detection_files:
         args.detection_files = os.listdir(config.matches_dir)
     else:
         args.detection_files = [path.split('/')[-1] for path in
                                 args.detection_files]
 
-    logging.info("Merging detections into event families.")
+    logger.info("Merging detections into event families.")
     detections = list(sort_detection_files(args.detection_files))
     chunksize = int(np.ceil(len(detections) / config.n_cpu))
     detections = chunks(detections, chunksize)
     with mp.Pool(processes=config.n_cpu) as pool:
         pool.starmap(process_detections,
                      [(temps, config, args.verbosity) for temps in detections])
-    logging.info("Finished merging detections.")
+    logger.info("Finished merging detections.")
 
 def process_detections(detections, config, verbosity):
     """Merge detections into events by applying criteria and write to files."""
-    setup_logging(verbosity)
+    logger = setup_logging(verbosity, __name__)
     for temp_detections in detections:
         event_detections = event_list(config, temp_detections)
         event_detections = merge(config, event_detections)
@@ -54,7 +54,7 @@ def process_detections(detections, config, verbosity):
                 f.write(f'{" ".join(ev.astype(str))}\n')
         if n_ev == 0:
             os.remove(f'{config.family_dir}/{ev_id}')
-        logging.debug(f"Found {n_ev} events for template {ev_id}.")
+        logger.debug(f"Found {n_ev} events for template {ev_id}.")
 
 
 

@@ -52,7 +52,7 @@ def chunks(data, N):
         yield chunk
 
 
-def setup_logging(verbosity):
+def setup_logging(verbosity, name):
     """Setup a logger."""
     verbosity_levels = {
         1: logging.ERROR,    # No messages
@@ -66,3 +66,4 @@ def setup_logging(verbosity):
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    return logging.getLogger(name)

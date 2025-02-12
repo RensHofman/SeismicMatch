@@ -31,14 +31,14 @@ def main():
     rays using a fixed value for P and S wave velocity.
     """
     args = parse_args()
-    setup_logging(args.verbosity)
-    
+    logger = setup_logging(args.verbosity, __name__)
+
     catalog = read_events(args.input_catalog)
     config = Config()
 
-    logging.info(f"Creating templates for {len(catalog)} events "
-                 f"in {args.input_catalog} on {config.n_stations} "
-                 "stations per event")
+    logger.info(f"Creating templates for {len(catalog)} events "
+                f"in {args.input_catalog} on {config.n_stations} "
+                "stations per event")
 
     # create project folders
     if not os.path.exists(config.template_dir):
@@ -55,31 +55,31 @@ def main():
                          for ev_list in events])
     n_new, n_exist = np.array(stats).sum(axis=0)
 
-    logging.info(f"Finished creating templates for {args.input_catalog}.")
-    logging.info(f"Result: {n_new} new templates, {n_exist} pre-existing.")
+    logger.info(f"Finished creating templates for {args.input_catalog}.")
+    logger.info(f"Result: {n_new} new templates, {n_exist} pre-existing.")
 
 def create_templates(event_list, config, verbosity):
     """Create template waveforms and event files for the events in the list."""
-    setup_logging(verbosity)
+    logger = setup_logging(verbosity, __name__)
     dh = DataHandler(config)
     n_new, n_exist = 0, 0
     for event in event_list:
         st = dh.create_template_traces(event)
         if not st:
             continue
-        logging.debug(f"{len(st)} candidate stream(s) for event on "
+        logger.debug(f"{len(st)} candidate stream(s) for event on "
                      f"{event.origins[0].time.ctime()}.")
         for tr in st:
             temp_name = template_name(tr, event)
             fname = f'{config.template_dir}/{temp_name}'
-    
+
             if os.path.exists(fname):
-                logging.debug(f"Template already exists in {temp_name}.")
+                logger.debug(f"Template already exists in {temp_name}.")
                 n_exist += 1
                 continue
             tr.stats['mseed'].pop('encoding', None)
             tr.write(fname, format='MSEED')
-            logging.debug(f"Created new template {temp_name}.")
+            logger.debug(f"Created new template {temp_name}.")
             n_new += 1
             
             ev_cat = f"{config.event_dir}/{event_name(event)}"

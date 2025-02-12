@@ -25,12 +25,12 @@ class DataHandler:
         """Initiate the data handler by reading the configurations."""
         self.config = config
         self.inventory = read_inventory(f'{config.meta_dir}/stations.xml')
- 
+
         if self.config.use_cupy:
             global cp
             import cupy as _cp
             cp = _cp
-            
+
     def create_template_traces(self, event):
         """Create template waveforms for event.
 

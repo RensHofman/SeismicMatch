@@ -21,13 +21,13 @@ def main():
     chosen automatically based on previously processed data.
     """
     args = parse_args()
-    setup_logging(args.verbosity)
+    logger = setup_logging(args.verbosity, __name__)
     config = Config()
 
     if not os.path.exists(config.matches_dir):
         os.makedirs(config.matches_dir)
 
-    logging.info("Scanning template- and match-files.")
+    logger.info("Scanning template- and match-files.")
     if not args.template_files:
         args.template_files = os.listdir(config.template_dir)
     else:
@@ -38,13 +38,13 @@ def main():
     matches = os.listdir(config.matches_dir)
     template_files = [t for t in args.template_files if t not in matches]
     if not template_files:
-        logging.info("No unprocessed templates found.")
+        logger.info("No unprocessed templates found.")
         return
 
     # split files into groups for same channel and template length
     template_groups = list(group_by_channel_length(template_files))
 
-    logging.info("Starting template matching.")
+    logger.info("Starting template matching.")
     # launch template matcher using multiple GPUs and a CPU pool
     if config.n_gpu > 1:
         chunksize = int(np.ceil(len(template_groups) / config.n_gpu))
@@ -65,11 +65,11 @@ def main():
             for templates in template_groups:
                 tm.match_templates(templates)
 
-    logging.info("Finished matching templates.")
+    logger.info("Finished matching templates.")
 
 
 def tm_worker(templates, config, verbosity, cuda_device, pool):
-    setup_logging(verbosity)
+    logger = setup_logging(verbosity, __name__)
     dh = DataHandler(config)
     tm = TemplateMatcher(config, dh, pool)
     tm.set_cuda_device(cuda_device)
