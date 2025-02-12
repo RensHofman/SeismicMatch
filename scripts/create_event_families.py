@@ -47,11 +47,14 @@ def process_detections(detections, config, verbosity):
         event_detections = merge(config, event_detections)
         events = apply_criteria(config, event_detections)
         ev_id = temp_detections[0, 1]
-        n = -1
+        n_ev = 0
         with open(f'{config.family_dir}/{ev_id}', 'w') as f:
-            for n, ev in enumerate(events):
+            for ev in events:
+                n_ev += 1
                 f.write(f'{" ".join(ev.astype(str))}\n')
-        logging.debug(f"Found {n+1} events for template {ev_id}.")
+        if n_ev == 0:
+            os.remove(f'{config.family_dir}/{ev_id}')
+        logging.debug(f"Found {n_ev} events for template {ev_id}.")
 
 
 
@@ -133,7 +136,7 @@ def apply_criteria(config, detections):
                 meets_mad_criteria(config, det)):
                 yield det
 
-        
+
 def meets_cc_criteria(config, det):
     """Return True if the detection meets the cc criteria."""
     if not config.cc_criteria:
