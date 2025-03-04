@@ -209,9 +209,10 @@ if no graphics card is available.
 - **template_data_structure** *(str, optional)*: description of the data  
      structure (folders & filenames) within `template_data_path`.  
      Placeholders can (and should) be used to include the data folder, year,  
-     netowrk code, station code, location code, channel code and the julian  
+     network code, station code, location code, channel code and the julian  
      day in curly brackets: {data_path}, {year}, {net}, {sta}, {loc}, {cha},  
-     {loc}, {julday}. Defaults to the `data_structure` as defined under  
+     {loc}, {julday}. The tag {quality} can be used optionally to include a  
+     data quality flag. Defaults to the `data_structure` as defined under  
      'folders and file structure'.
 
 #### pre-processing settings:
@@ -259,7 +260,8 @@ containing this configuration file.
     filenames) within `data_path`. Placeholders can (and should) be used to include  
     the data folder, year, netowrk code, station code, location code, channel code  
     and the julian day in curly brackets: {data_path}, {year}, {net}, {sta}, {loc},  
-    {cha}, {loc}, {julday}.
+    {cha}, {loc}, {julday}. The tag {quality} can be used optionally to include a  
+    data quality flag.
 
 #### event selection criteria:
 - **cc_criteria** *(list of floats, required)*: selection criteria to define an event  

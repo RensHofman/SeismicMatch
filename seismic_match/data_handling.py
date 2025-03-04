@@ -4,9 +4,11 @@ This module contains the DataHandler class that contains all methods
 used for reading and writing of waveform data.
 """
 import os
+import re
 import sys
 from glob import glob
 import logging
+from datetime import timedelta
 
 import numpy as np
 from obspy import read
@@ -119,20 +121,21 @@ class DataHandler:
                             loc, cha.code,
                             origin.time.year,
                             origin.time.julday,
+                            '*',
                             path_attr='temp_data_path',
                             structure_attr='temp_data_structure')
-                if not os.path.isfile(fname):
-                    logger.debug(f"Station {sta.code} has no data "
-                                 "for this day.")
-                    continue
                 try:
                     st = read(fname, headonly=True)
                     tr = st[0]
+                except FileNotFoundError:
+                    logger.debug(f"Station {sta.code} has no data "
+                                 "for this day.")
+                    continue
                 except Exception as e:
                     logger.error(f"Could not read trace {fname}:\n{e}")
                     continue
                 if (tr.stats.starttime > origin.time - 2 or
-                        tr.stats.endtime < (origin.time + 
+                        tr.stats.endtime < (origin.time +
                                             self.config.min_win_len)):
                     logger.debug(f"Station {sta.code} has no data within "
                                  "the event window.")
@@ -157,6 +160,7 @@ class DataHandler:
                     net, sta, loc, cha,
                     window[0].year,
                     window[0].julday,
+                    '*',
                     path_attr='temp_data_path',
                     structure_attr='temp_data_structure')]
         if window[0].julday != window[1].julday:
@@ -164,6 +168,7 @@ class DataHandler:
                         net, sta, loc, cha,
                         window[1].year,
                         window[1].julday,
+                        '*',
                         path_attr='temp_data_path',
                         structure_attr='temp_data_structure')]
         for f in data:
@@ -198,35 +203,32 @@ class DataHandler:
         """Return a list of dayfiles."""
         net, sta, loc, cha = waveform_id.split('.')
 
-        d_files = sorted(glob(self.construct_data_path(
-                    net, sta, loc, cha, '*', '*'
-                    )))
-        if start is not None:
-            start_file = self.construct_data_path(
-                            net, sta, loc, cha,
-                            start.year, start.strftime('%j')
-                            )
-            if start_file in d_files:
-                d_files = d_files[d_files.index(start_file):]
-            else:
-                d_files.append(start_file)
-                d_files = sorted(d_files)
-                d_files = d_files[d_files.index(start_file)+1:]
+        d_files = glob(self.construct_data_path(
+                    net, sta, loc, cha, '*', '*', '*',
+                    ))
+        files_in_range = []
+        date = start
+        days_requested = 0
+        while date <= end:
+            pattern = self.construct_data_path(
+                        net, sta, loc, cha,
+                        date.year,
+                        date.strftime('%j'),
+                        '.*',
+                        )
+            regex = re.compile(pattern)
+            for fname in d_files:
+                if regex.match(fname):
+                    files_in_range += [fname]
+                    break
+            days_requested += 1
+            date += timedelta(days=1)
 
-        if end is not None:
-            stop = self.construct_data_path(
-                    net, sta, loc, cha,
-                    end.year, end.strftime('%j')
-                    )
-            if stop not in d_files:
-                d_files.append(stop)
-                d_files = sorted(d_files)
-            d_files = d_files[:d_files.index(stop) + 1]
+        logger.debug(
+            f"{len(files_in_range)}/{days_requested} dayfiles available "
+            f"within the requested timespan (channel {waveform_id}).")
 
-        logger.debug(f"{len(d_files)} unprocessed dayfiles found for "
-                     f"channel {waveform_id}.")
-
-        return d_files
+        return files_in_range
 
     def read_bulk_data(self, files, pool=None, method='assume_equal_length',
                   bandpass=True):
@@ -282,7 +284,7 @@ class DataHandler:
         tr = self.read_trace(f)
         self.filter_trace(tr)
         return tr
-    
+
     def filter_trace(self, tr):
         """Filter trace according to config settings."""
         if tr is not None:
@@ -320,7 +322,7 @@ class DataHandler:
         return [start, start + length]
 
     def construct_data_path(self, net, sta, loc, cha, year, julday,
-                            path_attr='data_path',
+                            quality, path_attr='data_path',
                             structure_attr='data_structure'):
         """Return the path to the data file."""
         if isinstance(julday, int):
@@ -337,5 +339,7 @@ class DataHandler:
                     loc=loc,
                     cha=cha,
                     year=year,
-                    julday=julday
+                    julday=julday,
+                    quality=quality
                     )
+

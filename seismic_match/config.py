@@ -264,7 +264,7 @@ class DefaultConfig():
             'data_path': (True, str, None, 'data_CX'),
             'data_structure': (True, str, None,
                                '"{data_path}/{year}/{net}/{sta}/{cha}.D/\\\n\
-                     {net}.{sta}.{loc}.{cha}.D.{year}.{julday}"'),
+                     {net}.{sta}.{loc}.{cha}.{quality}.{year}.{julday}"'),
             },
         'selection': {
             'cc_criteria': (True, list, (0, 1), [.7, .7]),
@@ -318,9 +318,10 @@ class DefaultConfig():
 #       template_data_structure (str, optional): description of the data
 #           structure (folders & filenames) within 'template_data_path'.
 #           Placeholders can (and should) be used to include the data folder,
-#           year, netowrk code, station code, location code, channel code and
+#           year, network code, station code, location code, channel code and
 #           the julian day in curly brackets: {data_path}, {year}, {net},
-#           {sta}, {loc}, {cha}, {loc}, {julday}. Defaults to the
+#           {sta}, {loc}, {cha}, {loc}, {julday}. The tag {quality} can be used
+#           optionally for a data quality flag. Defaults to the
 #           'data_structure' as defined under 'folders and file structure'.
 #
 #   pre-processing settings:
@@ -372,7 +373,8 @@ class DefaultConfig():
 #           should) be used to include the data folder, year, netowrk code,
 #           station code, location code, channel code and the julian day in
 #           curly brackets: {data_path}, {year}, {net}, {sta}, {loc}, {cha},
-#           {loc}, {julday}.
+#           {loc}, {julday}. The tag {quality} can be used optionally for a
+#           data quality flag.
 #
 #   event selection criteria:
 #       cc_criteria (list of floats, required): selection criteria to define an
