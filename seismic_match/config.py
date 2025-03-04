@@ -263,7 +263,7 @@ class DefaultConfig():
             'family_dir': (True, str, None, 'event_families'),
             'data_path': (True, str, None, 'data_CX'),
             'data_structure': (True, str, None,
-                               '"{data_path}/{year}/{net}/{sta}/{cha}.D/\\\n\
+                               '"{data_path}/{year}/{net}/{sta}/{cha}.{quality}/\\\n\
                      {net}.{sta}.{loc}.{cha}.{quality}.{year}.{julday}"'),
             },
         'selection': {
