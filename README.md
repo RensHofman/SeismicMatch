@@ -67,7 +67,7 @@ the full CPU mode.
 Move inside the SeismicMatch project folder that contains "setup.py" and run the
 installation script (requires pip and setuptools).
 ```console
->>> cd ~/Downloads/SeismicMatch
+>>> cd SeismicMatch
 >>> pip install .
 ```
 
