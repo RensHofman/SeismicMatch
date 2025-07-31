@@ -214,12 +214,14 @@ class DataHandler:
                         net, sta, loc, cha,
                         date.year,
                         date.strftime('%j'),
-                        '.*',
+                        '*',
                         )
+            logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
                 if regex.match(fname):
                     files_in_range += [fname]
+                    logger.debug(f"Found file {fname}.")
                     break
             days_requested += 1
             date += timedelta(days=1)
