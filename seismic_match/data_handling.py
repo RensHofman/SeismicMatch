@@ -7,6 +7,7 @@ import os
 import re
 import sys
 from glob import glob
+from pathlib import Path
 import logging
 from datetime import timedelta
 
@@ -210,12 +211,13 @@ class DataHandler:
         date = start
         days_requested = 0
         while date <= end:
-            pattern = self.construct_data_path(
+            path = self.construct_data_path(
                         net, sta, loc, cha,
                         date.year,
                         date.strftime('%j'),
                         '*',
                         )
+            pattern = str(Path(path))
             logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
@@ -334,7 +336,7 @@ class DataHandler:
         data_path = getattr(self.config, path_attr)
         data_structure = getattr(self.config, structure_attr)
 
-        path = data_structure.format(
+        return data_structure.format(
                     data_path=data_path,
                     net=net,
                     sta=sta,
@@ -344,5 +346,3 @@ class DataHandler:
                     julday=julday,
                     quality=quality
                     )
-                                
-        return os.path.join(*path.split('/'))
