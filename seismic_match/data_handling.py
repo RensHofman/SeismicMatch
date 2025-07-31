@@ -219,7 +219,7 @@ class DataHandler:
             logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
-                if regex.match(fname):
+                if regex.match(os.normpath(fname)):
                     files_in_range += [fname]
                     logger.debug(f"Found file {fname}.")
                     break
@@ -344,5 +344,4 @@ class DataHandler:
                     julday=julday,
                     quality=quality
                     )
-                                
-        return os.path.join(*path.split('/'))
+        return os.normpath(path)
