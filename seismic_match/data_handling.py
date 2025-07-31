@@ -334,7 +334,7 @@ class DataHandler:
         data_path = getattr(self.config, path_attr)
         data_structure = getattr(self.config, structure_attr)
 
-        return data_structure.format(
+        path = data_structure.format(
                     data_path=data_path,
                     net=net,
                     sta=sta,
@@ -344,4 +344,5 @@ class DataHandler:
                     julday=julday,
                     quality=quality
                     )
-
+                                
+        return os.path.join(*path.split('/'))
