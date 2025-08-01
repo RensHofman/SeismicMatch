@@ -133,7 +133,7 @@ class DataHandler:
                                  "for this day.")
                     continue
                 except Exception as e:
-                    logger.error(f"Could not read trace {fname}:\n{e}")
+                    logger.debug(f"Could not read trace {fname}:\n{e}")
                     continue
                 if (tr.stats.starttime > origin.time - 2 or
                         tr.stats.endtime < (origin.time +
@@ -279,7 +279,7 @@ class DataHandler:
             st = read(f, dtype=np.float32, format='MSEED')
             tr = st[0]
         except Exception as e:
-            logger.error(f"Could not read trace {f}:\n{e}")
+            logger.debug(f"Could not read trace {f}:\n{e}")
             return None
         return tr
 
