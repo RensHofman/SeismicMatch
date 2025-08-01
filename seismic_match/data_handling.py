@@ -211,13 +211,12 @@ class DataHandler:
         date = start
         days_requested = 0
         while date <= end:
-            path = self.construct_data_path(
+            pattern = self.construct_data_path(
                         net, sta, loc, cha,
                         date.year,
                         date.strftime('%j'),
                         '*',
                         )
-            pattern = str(Path(path))
             logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
