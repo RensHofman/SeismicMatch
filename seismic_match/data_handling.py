@@ -219,7 +219,8 @@ class DataHandler:
             logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
-                if regex.match(os.path.normpath(fname)):
+                fname = fname.replace('\\', '/')
+                if regex.match(fname):
                     files_in_range += [fname]
                     logger.debug(f"Found file {fname}.")
                     break
@@ -334,7 +335,7 @@ class DataHandler:
         data_path = getattr(self.config, path_attr)
         data_structure = getattr(self.config, structure_attr)
 
-        path = data_structure.format(
+        return data_structure.format(
                     data_path=data_path,
                     net=net,
                     sta=sta,
@@ -344,4 +345,3 @@ class DataHandler:
                     julday=julday,
                     quality=quality
                     )
-        return os.path.normpath(path)
