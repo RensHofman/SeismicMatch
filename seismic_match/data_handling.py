@@ -221,6 +221,7 @@ class DataHandler:
             logger.debug(f"Searching for file {pattern}.")
             regex = re.compile(pattern)
             for fname in d_files:
+                fname = fname.replace('\\', '/')
                 if regex.match(fname):
                     files_in_range += [fname]
                     logger.debug(f"Found file {fname}.")
